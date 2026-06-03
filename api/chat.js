@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -7,27 +7,22 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { question } = req.body;
+  if (!question) return res.status(400).json({ error: 'Question required' });
 
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwAqD2jfG2cKo7K7LojTWweEFPinjhQYVsgYA9wPHOCHRIJIw-QQdin59l9dgPMmkbk/exec';
 
-  // Step 1: Check GROQ key
-  const keyExists = !!process.env.GROQ_API_KEY;
-  const keyPreview = process.env.GROQ_API_KEY?.slice(0, 8) || 'NOT FOUND';
-
-  // Step 2: Fetch sheet data
-  let sheetData = [];
-  let sheetError = null;
   try {
     const sheetRes = await fetch(APPS_SCRIPT_URL, { redirect: 'follow' });
-    sheetData = await sheetRes.json();
-  } catch(e) {
-    sheetError = e.message;
-  }
+    const sheetData = await sheetRes.json();
 
-  // Step 3: Try Groq
-  let groqResponse = null;
-  let groqError = null;
-  try {
+    const context = sheetData.map(row =>
+      `Type: ${row.type || ''}
+SubType: ${row.subType || ''}
+Pre-checks: ${row.preChecks || ''}
+Escalation Path: ${row.escalationPath || ''}
+Extra Details: ${row.extraDetails || ''}`
+    ).join('\n\n---\n\n');
+
     const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -37,25 +32,29 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'llama3-8b-8192',
         messages: [
-          { role: 'system', content: 'You are a helpful assistant.' },
-          { role: 'user', content: question || 'Hello' }
+          {
+            role: 'system',
+            content: `You are a helpful support assistant for Volt Money. You help support agents resolve customer issues.
+Answer ONLY based on the support manual data provided below.
+Give clear, friendly, step-by-step answers in simple Hindi or English (match the language of the question).
+If the answer is not in the manual, say: "Yeh issue manual mein nahi mila. Please escalate to your team lead."
+Never make up information.
+
+Support Manual Data:
+${context}`
+          },
+          { role: 'user', content: question }
         ],
-        max_tokens: 100
+        temperature: 0.3,
+        max_tokens: 800
       })
     });
-    groqResponse = await groqRes.json();
-  } catch(e) {
-    groqError = e.message;
-  }
 
-  return res.status(200).json({
-    debug: {
-      keyExists,
-      keyPreview,
-      sheetRowsCount: sheetData.length || 0,
-      sheetError,
-      groqResponse,
-      groqError
-    }
-  });
-}
+    const groqData = await groqRes.json();
+    const answer = groqData.choices?.[0]?.message?.content || 'Koi answer nahi mila.';
+    return res.status(200).json({ answer });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
