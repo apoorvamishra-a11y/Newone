@@ -1,0 +1,118 @@
+/* AI Modal Styles */
+.ai-fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #2f3ac7, #7c3aed);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(47,58,199,0.4);
+  z-index: 1000;
+  font-size: 24px;
+  transition: transform 0.2s;
+}
+.ai-fab:hover { transform: scale(1.1); }
+
+.ai-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1001;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 100px;
+}
+.ai-modal-overlay.open { display: flex; }
+
+.ai-modal {
+  background: white;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 680px;
+  padding: 24px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.2);
+}
+.ai-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.ai-modal-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2f3ac7;
+}
+.ai-close-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #888;
+}
+.ai-chat-history {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ai-msg-user {
+  align-self: flex-end;
+  background: #2f3ac7;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 18px 18px 4px 18px;
+  font-size: 14px;
+  max-width: 80%;
+}
+.ai-msg-bot {
+  align-self: flex-start;
+  background: #f0f2ff;
+  color: #1a1a2e;
+  padding: 10px 16px;
+  border-radius: 18px 18px 18px 4px;
+  font-size: 14px;
+  max-width: 85%;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+.ai-input-row {
+  display: flex;
+  gap: 10px;
+}
+.ai-input-row input {
+  flex: 1;
+  padding: 10px 16px;
+  border: 2px solid #2f3ac7;
+  border-radius: 20px;
+  font-size: 14px;
+  outline: none;
+  font-family: 'Segoe UI', sans-serif;
+}
+.ai-send-btn {
+  background: #2f3ac7;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ai-send-btn:disabled { background: #aaa; cursor: not-allowed; }
+.ai-typing {
+  font-size: 13px;
+  color: #888;
+  font-style: italic;
+}
