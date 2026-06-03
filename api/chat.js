@@ -12,11 +12,9 @@ export default async function handler(req, res) {
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwAqD2jfG2cKo7K7LojTWweEFPinjhQYVsgYA9wPHOCHRIJIw-QQdin59l9dgPMmkbk/exec';
 
   try {
-    // Step 1: Sheet se live data fetch karo
     const sheetRes = await fetch(APPS_SCRIPT_URL, { redirect: 'follow' });
     const sheetData = await sheetRes.json();
 
-    // Step 2: Data ko readable context string mein convert karo
     const context = sheetData.map(row =>
       `Type: ${row.type || ''}
 SubType: ${row.subType || ''}
@@ -25,7 +23,6 @@ Escalation Path: ${row.escalationPath || ''}
 Extra Details: ${row.extraDetails || ''}`
     ).join('\n\n---\n\n');
 
-    // Step 3: Groq ko bhejo
     const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -37,20 +34,16 @@ Extra Details: ${row.extraDetails || ''}`
         messages: [
           {
             role: 'system',
-            content: `You are a helpful support assistant for Volt Money.
-You help support agents resolve customer issues.
+            content: `You are a helpful support assistant for Volt Money. You help support agents resolve customer issues.
 Answer ONLY based on the support manual data provided below.
-Give clear, step-by-step answers in simple Hindi or English (match the language of the question).
+Give clear, friendly, step-by-step answers in simple Hindi or English (match the language of the question).
 If the answer is not in the manual, say: "Yeh issue manual mein nahi mila. Please escalate to your team lead."
 Never make up information.
 
 Support Manual Data:
 ${context}`
           },
-          {
-            role: 'user',
-            content: question
-          }
+          { role: 'user', content: question }
         ],
         temperature: 0.3,
         max_tokens: 800
