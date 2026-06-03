@@ -9,6 +9,7 @@ module.exports = async function handler(req, res) {
   const { question } = req.body;
   if (!question) return res.status(400).json({ error: 'Question required' });
 
+  const GROQ_API_KEY = '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';
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwAqD2jfG2cKo7K7LojTWweEFPinjhQYVsgYA9wPHOCHRIJIw-QQdin59l9dgPMmkbk/exec';
 
   try {
@@ -27,7 +28,7 @@ Extra Details: ${row.extraDetails || ''}`
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+        'Authorization': `Bearer ${GROQ_API_KEY}`
       },
       body: JSON.stringify({
         model: 'llama3-8b-8192',
